@@ -8,7 +8,8 @@ from urllib.request import Request, urlopen
 JUDGE0_API_URL = os.getenv("JUDGE0_API_URL", "https://ce.judge0.com")
 AUTH_TOKEN_HEADER = os.getenv("AUTH_TOKEN_HEADER", "X-Auth-Token")
 AUTH_TOKEN = os.getenv("AUTH_TOKEN")
-PORT = 8000
+PORT = int(os.getenv("PORT", "8000"))
+
 HEADERS = {
   AUTH_TOKEN_HEADER: AUTH_TOKEN
 }
