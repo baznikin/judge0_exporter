@@ -12,6 +12,7 @@ Configuration variables
 | AUTH_TOKEN_HEADER | `X-Auth-Token` | Authentication token (a.k.a. API key) header |
 | AUTH_TOKEN | `` | Actual authentication token (a.k.a. API key) value |
 | PORT | `8000` | Port to expose Prometheus metrics |
+| REFRESH_INTERVAL | `15` | Judge0 API scrape interval |
 
 Limitations
 -----------
