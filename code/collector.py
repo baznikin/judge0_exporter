@@ -1,17 +1,31 @@
-import time
 import json
+import os
+import time
 from prometheus_client.core import REGISTRY, CounterMetricFamily
 from prometheus_client import start_http_server
+from urllib.request import Request, urlopen
 
+JUDGE0_API_URL = os.getenv("JUDGE0_API_URL", "https://ce.judge0.com")
+AUTH_TOKEN_HEADER = os.getenv("AUTH_TOKEN_HEADER", "X-Auth-Token")
+AUTH_TOKEN = os.getenv("AUTH_TOKEN")
+PORT = 8000
+HEADERS = {
+  AUTH_TOKEN_HEADER: AUTH_TOKEN
+}
+
+if AUTH_TOKEN == None:
+    print('AUTH_TOKEN not provided')
+    exit(1)
 
 class CustomCollector(object):
     def __init__(self):
         pass
 
     def collect(self):
-        input_json_string = '[{"queue":"default","size":0,"available":0,"idle":0,"working":0,"paused":0,"failed":0},{"queue":"1.13.0","size":0,"available":0,"idle":0,"working":0,"paused":0,"failed":0}]'
+        request = Request(JUDGE0_API_URL+'/workers', headers=HEADERS)
+        response = urlopen(request)
+        judge0_workers = json.loads(response.read())
 
-        judge0_workers = json.loads(input_json_string)
         for queue in judge0_workers:
             queue_name = queue['queue']
             for metric in queue:
@@ -20,7 +34,7 @@ class CustomCollector(object):
                     continue
 
                 if metric == 'size':
-                    description = 'Total number of workers'
+                    description = 'Total number of submissions if queue'
                 else:
                     description = 'Number of ' + metric + ' workers'
 
@@ -30,7 +44,8 @@ class CustomCollector(object):
                 yield c
 
 if __name__ == '__main__':
-    start_http_server(8000)
+    print('Start serving metrics from', JUDGE0_API_URL, 'on port', PORT)
+    start_http_server(PORT)
     REGISTRY.register(CustomCollector())
     while True:
         time.sleep(1)
