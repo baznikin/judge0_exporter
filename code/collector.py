@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from prometheus_client.core import REGISTRY, CounterMetricFamily
+from prometheus_client.core import REGISTRY, GaugeMetricFamily
 from prometheus_client import start_http_server
 from urllib.request import Request, urlopen
 
@@ -40,7 +40,7 @@ class CustomCollector(object):
                     description = 'Number of ' + metric + ' workers'
 
                 print(queue_name, '_', metric, ":", queue[metric])
-                c = CounterMetricFamily("judge0_queue_"+metric, description, labels=['queue'])
+                c = GaugeMetricFamily("judge0_queue_"+metric, description, labels=['queue'])
                 c.add_metric([queue_name], queue[metric])
                 yield c
 
