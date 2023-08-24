@@ -18,12 +18,15 @@ HEADERS = {
 # Shared storage of fetched data
 judge0_workers = {}
 
+
 if AUTH_TOKEN == None:
     print('AUTH_TOKEN not provided')
     exit(1)
 
 class CustomCollector(object):
     def collect(self):
+        # Track created metrics
+        metrics = {}
         for queue in judge0_workers:
             queue_name = queue['queue']
             for metric in queue:
@@ -37,9 +40,12 @@ class CustomCollector(object):
 
 
                 metric_name = f'judge0_workers_{metric}'
-                gauge = GaugeMetricFamily(metric_name, description, labels=['queue'])
-                gauge.add_metric([queue_name], queue[metric])
-                yield gauge
+                # register each metric only once
+                if metric_name not in metrics:
+                    metrics[metric_name] = GaugeMetricFamily(metric_name, description, labels=['queue'])
+                metrics[metric_name].add_metric([queue_name], queue[metric])
+        for name in metrics:
+            yield metrics[name]
 
 async def fetch_data(session):
     global judge0_workers
